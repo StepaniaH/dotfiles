@@ -1,7 +1,7 @@
 #!/opt/homebrew/bin/bash
 
 DOTFILES_DIR="$HOME/Developer/dotfiles"
-TARGET_DIR="$HOME/test/"
+TARGET_DIR="$HOME/"
 BACKUP_DIR="$HOME/dotfiles-backup/$(date +%Y%m%d_%H%M%S)"
 
 GREEN='\033[0;32m'
@@ -125,3 +125,55 @@ echo -e "${BLUE}Linking general configuration file...${NC}"
 ## bat
 create_link "$DOTFILES_DIR/config/bat/config" "$TARGET_DIR/.config/bat/config"
 link_directory_contents "$DOTFILES_DIR/config/bat/themes" "$TARGET_DIR/.config/bat/themes"
+
+## btop
+create_link "$DOTFILES_DIR/config/btop/btop.conf" "$TARGET_DIR/.config/btop/btop.conf"
+link_directory_contents "$DOTFILES_DIR/config/btop/themes" "$TARGET_DIR/.config/btop/themes"
+
+## emacs
+create_link "$DOTFILES_DIR/config/emacs/init.el" "$TARGET_DIR/.config/emacs/init.el"
+create_link "$DOTFILES_DIR/config/emacs/custom.el" "$TARGET_DIR/.config/emacs/custom.el"
+create_link "$DOTFILES_DIR/config/emacs/.mc-lists.el" "$TARGET_DIR/.config/emacs/.mc-lists.el"
+link_directory_contents "$DOTFILES_DIR/config/emacs/lisp" "$TARGET_DIR/.config/emacs/lisp"
+link_directory_contents "$DOTFILES_DIR/config/emacs/snippets" "$TARGET_DIR/.config/emacs/snippets"
+
+## eza
+create_link "$DOTFILES_DIR/config/eza/theme.yml" "$TARGET_DIR/.config/eza/theme.yml"
+
+## fastfetch
+create_link "$DOTFILES_DIR/config/fastfetch/cat.txt" "$TARGET_DIR/.config/fastfetch/cat.txt"
+create_link "$DOTFILES_DIR/config/fastfetch/config.jsonc" "$TARGET_DIR/.config/fastfetch/config.jsonc"
+
+## glow
+create_link "$DOTFILES_DIR/config/glow/glow.yml" "$TARGET_DIR/.config/glow/glow.yml"
+
+## karabiner
+create_link "$DOTFILES_DIR/config/karabiner/karabiner.json" "$TARGET_DIR/.config/karabiner/karabiner.json"
+
+## kitty
+link_directory_contents "$DOTFILES_DIR/config/kitty" "$TARGET_DIR/.config/kitty"
+
+## lazygit
+create_link "$DOTFILES_DIR/config/lazygit/config.yml" "$TARGET_DIR/.config/lazygit/config.yml"
+
+## newsboat
+create_link "$DOTFILES_DIR/config/newsboat/config" "$TARGET_DIR/.config/newsboat/config"
+create_link "$DOTFILES_DIR/config/newsboat/dark" "$TARGET_DIR/.config/newsboat/dark"
+
+## nvim
+create_link "$DOTFILES_DIR/config/nvim/init.lua" "$TARGET_DIR/.config/nvim/init.lua"
+link_directory_contents "$DOTFILES_DIR/config/nvim/after/ftplugin" "$TARGET_DIR/.config/nvim/after/ftplugin"
+link_directory_contents "$DOTFILES_DIR/config/nvim/lua/config" "$TARGET_DIR/.config/nvim/lua/config"
+link_directory_contents "$DOTFILES_DIR/config/nvim/lua/plugins" "$TARGET_DIR/.config/nvim/lua/plugins"
+link_directory_contents "$DOTFILES_DIR/config/nvim/plugin" "$TARGET_DIR/.config/nvim/plugin"
+
+## thefuck
+create_link "$DOTFILES_DIR/config/thefuck/settings.py" "$TARGET_DIR/.config/thefuck/settings.py"
+link_directory_contents "$DOTFILES_DIR/config/thefuck/rules" "$TARGET_DIR/.config/thefuck/rules"
+
+## yazi
+link_directory_contents "$DOTFILES_DIR/config/yazi" "$TARGET_DIR/.config/yazi"
+
+## zsh
+create_link "$DOTFILES_DIR/config/zsh/.zimrc" "$TARGET_DIR/.config/zsh/.zimrc"
+link_directory_contents "$DOTFILES_DIR/config/zsh" "$TARGET_DIR/.config/zsh"
