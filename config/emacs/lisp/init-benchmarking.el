@@ -64,7 +64,7 @@ LOAD-DURATION is the time taken in milliseconds to load FEATURE.")
     (tabulated-list-revert)
     (display-buffer (current-buffer))))
 
-
+
 
 
 (defun sanityinc/show-init-time ()

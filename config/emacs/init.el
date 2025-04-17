@@ -55,8 +55,12 @@
 (global-set-key (kbd "s-z") 'undo) ;对应Windows上面的Ctrol-z 撤销
 (global-set-key (kbd "s-x") 'kill-region) ;对应Windows上面的Ctrol-x 剪切
 
+(defun open-init-file ()
+  "Open the user's init file of configuration."
+  (interactive)
+  (find-file user-init-file))
 
-
+(global-hl-line-mode 1)
 
 (provide 'init)
 ;;; init.el ends here
