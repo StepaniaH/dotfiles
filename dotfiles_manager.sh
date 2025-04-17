@@ -1,4 +1,4 @@
-#!/opt/homebrew/bin/bash
+#!/usr/bin/env bash
 
 DOTFILES_DIR="$HOME/Developer/dotfiles"
 TARGET_DIR="$HOME/"

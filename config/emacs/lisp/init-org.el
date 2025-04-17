@@ -2,7 +2,7 @@
 ;;; Commentary:
 ;;; Code:
 
-(setq org-directory (file-truename "~/org/"))
+(setq org-directory (file-truename "~/Documents/helloworld/"))
 (use-package org-roam
   :ensure t
   :after org
