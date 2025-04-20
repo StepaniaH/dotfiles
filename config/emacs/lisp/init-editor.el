@@ -71,7 +71,8 @@ Up^^       Down^^      Miscellaneous      % 2(mc/num-cursors) cursor%s(if (> (mc
 (use-package avy
  :ensure t
  :bind
- (("C-j C-SPC" . avy-goto-char-timer)))
+ (("C-j C-SPC" . avy-goto-char-timer)
+  ("C-j C-l" . avy-goto-line)))
 
 ;; Highlight symbol
 (use-package highlight-symbol

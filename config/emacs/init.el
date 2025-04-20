@@ -6,61 +6,163 @@
 
 ;;; Code:
 
-;; Produce backtraces when errors occur: can be helpful to diagnose startup issues
-;;(setq debug-on-error t)
+;; Garbage collection configuration for the startup times speed.
+;; Set extremely lenient garbage collection conditions at startup
+(setq gc-cons-threshold most-positive-fixnum
+      gc-cons-percentage 0.6)  ;; Increase to 60%, reduce the number of GCs during the startup process
 
-(let ((minver "27.1"))
-  (when (version< emacs-version minver)
-    (error "Your Emacs is too old -- this config requires v%s or higher" minver)))
-(when (version< emacs-version "28.1")
-  (message "Your Emacs is old, and some functionality in this config will be disabled. Please upgrade if possible."))
+;; Restore to a reasonable but still lenient value after startup.
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (setq gc-cons-threshold (* 256 1024 1024)  ;; 256MB
+		  gc-cons-percentage 0.1)))            ;; Default value
 
-;; Add lisp directory to load path
-(add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
-(require 'init-benchmarking) ;; Measure startup time
+;; Increase how much is read from processes in a single chunk (default is 4kb).
+;; `lsp-mode' benefits from that.
+;;
+;; `cat /proc/sys/fs/pipe-max-size` to check the max value (on Linux).
+;; `sysctl -a` to check the system information (on macOS).
+(setq read-process-output-max (* 4 1024 1024))
 
-;l; Constants
-(defconst *spell-check-support-enable* nil) ;; Enable with t if you prefer
-(defconst *is-a-mac* (eq system-type 'darwin))
+
+(require 'package)
+(setq package-archives
+      '(("melpa"  . "https://melpa.org/packages/")
+        ("gnu"    . "https://elpa.gnu.org/packages/")
+        ("nongnu" . "https://elpa.nongnu.org/nongnu/")))
+(package-initialize)
+
+;; Bootstrap `use-package'
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+(eval-and-compile
+  (setq use-package-always-ensure nil)
+  (setq use-package-always-defer nil)
+  (setq use-package-always-demand nil)
+  (setq use-package-expand-minimally nil)
+  (setq use-package-enable-imenu-support t))
+(eval-when-compile
+  (require 'use-package))
+
+;; Keep ~/.config/emacs/ clean.
+(use-package no-littering
+  :ensure t
+  :demand t)
+
+;; Bootstrap `quelpa'.
+(use-package quelpa
+  :ensure t
+  :commands quelpa
+  :custom
+  (quelpa-git-clone-depth 1)
+  (quelpa-self-upgrade-p nil)
+  (quelpa-update-melpa-p nil)
+  (quelpa-checkout-melpa-p nil))
+
+;; --debug-init implies `debug-on-error'.
+(setq debug-on-error init-file-debug)
+
+;; Add Emacs Lisp directories to load path
+(let ((dir (locate-user-emacs-file "lisp")))
+  (add-to-list 'load-path (file-name-as-directory dir))
+  (add-to-list 'load-path (file-name-as-directory (expand-file-name "lang" dir))))
 
 ;; Save custom settings to a separate file
-(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
-;; Create this file if it is not exist
+(setq custom-file (locate-user-emacs-file "custom.el"))
+
+;; Create custom file if it doesn't exist
 (unless (file-exists-p custom-file)
   (write-region "" nil custom-file))
-;; Load it
-(load custom-file)
+
+
+
+(require 'init-benchmarking) ;; Measure startup time
+
 
 ;; Core modules
-(require 'init-package) ;; Package management must be loaded first
 (require 'init-base)    ;; Basic options
 (require 'init-ui)      ;; UI
-(require 'init-keys)    ;; Global key-bindings
+(require 'init-keybindings)    ;; Global key-bindings
 
 ;; Functionality modules
-(require 'init-lib)     ;; Basic tools
+(require 'init-tools)     ;; Basic tools
 (require 'init-editor)  ;; Editor behavior
 (require 'init-completion)   ;; Complete framework
 (require 'init-dev)
 (require 'init-lsp)
 (require 'init-org)
 
+;; standalone apps
+(require 'init-spell)
 
-;; Some keybindings
-(setq mac-command-modifier 'super)
-(global-set-key (kbd "s-a") 'mark-whole-buffer) ;;对应Windows上面的Ctrl-a 全选
-(global-set-key (kbd "s-c") 'kill-ring-save) ;;对应Windows上面的Ctrl-c 复制
-(global-set-key (kbd "s-s") 'save-buffer) ;; 对应Windows上面的Ctrl-s 保存
-(global-set-key (kbd "s-v") 'yank) ;对应Windows上面的Ctrl-v 粘贴
-(global-set-key (kbd "s-z") 'undo) ;对应Windows上面的Ctrol-z 撤销
-(global-set-key (kbd "s-x") 'kill-region) ;对应Windows上面的Ctrol-x 剪切
 
 (defun open-init-file ()
   "Open the user's init file of configuration."
   (interactive)
   (find-file user-init-file))
 
-(global-hl-line-mode 1)
+(global-hl-line-mode 1) ;; Highlight the current line
+
+;;让鼠标滚动更好用
+(setq mouse-wheel-scroll-amount '(1 ((shift) . 1) ((control) . nil)))
+(setq mouse-wheel-progressive-speed nil)
+
+
+
+;; macOS 文件和目录外部操作功能
+(defun consult-directory-externally (file)
+  "Open FILE or its directory externally using macOS Finder."
+  (interactive "fOpen externally: ")
+  (let ((path (expand-file-name file)))
+    (if (file-directory-p path)
+        ;; 如果是目录，直接打开
+        (shell-command (format "open %s" (shell-quote-argument path)))
+      ;; 如果是文件，打开其所在目录并选中该文件
+      (shell-command (format "open -R %s" (shell-quote-argument path))))))
+
+(defun my-open-current-directory ()
+  "Open current directory in Finder."
+  (interactive)
+  (shell-command (format "open %s" (shell-quote-argument default-directory))))
+
+(defun open-with-default-app (file)
+  "Open FILE with its default application."
+  (interactive "fOpen file with default app: ")
+  (shell-command (format "open %s" (shell-quote-argument (expand-file-name file)))))
+
+(defun reveal-in-finder (file)
+  "Reveal FILE in Finder."
+  (interactive (list (or (buffer-file-name) default-directory)))
+  (shell-command (format "open -R %s" (shell-quote-argument (expand-file-name file)))))
+
+(defun open-terminal-here ()
+  "Open Terminal.app at current directory."
+  (interactive)
+  (shell-command (format "open -a Terminal %s" (shell-quote-argument default-directory))))
+
+(defun open-kitty-here ()
+  "Open Kitty terminal at current directory."
+  (interactive)
+  (let ((dir (shell-quote-argument (expand-file-name default-directory))))
+    (start-process "kitty" nil "kitty" "--single-instance" "--directory" dir)))
+
+;; 集成到 Embark (如果已安装)
+(with-eval-after-load 'embark
+  (define-key embark-file-map (kbd "E") #'consult-directory-externally)
+  (define-key embark-file-map (kbd "O") #'open-with-default-app)
+  (define-key embark-file-map (kbd "R") #'reveal-in-finder)
+  (define-key embark-file-map (kbd "T") #'open-terminal-here)
+  (define-key embark-file-map (kbd "I") #'open-iterm-here))
+
+;; 全局键绑定
+(global-set-key (kbd "C-c o d") #'my-open-current-directory)
+(global-set-key (kbd "C-c o f") #'reveal-in-finder)
+(global-set-key (kbd "C-c o t") #'open-terminal-here)
+
+;; Load custom settings at the end to avoid some unexpected error.
+(when (file-exists-p custom-file)
+  (load custom-file))
 
 (provide 'init)
 ;;; init.el ends here

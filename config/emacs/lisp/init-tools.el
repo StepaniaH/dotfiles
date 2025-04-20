@@ -1,4 +1,4 @@
-;;; init-lib.el --- Library dependencies -*- lexical-binding: t -*-
+;;; init-tools.el --- Some useful productive tools -*- lexical-binding: t -*-
 ;;; Commentary:
 ;;; Code:
 
@@ -14,5 +14,5 @@
   :config
   (global-wakatime-mode))
 
-(provide 'init-lib)
-;;; init-lib.el ends here
+(provide 'init-tools)
+;;; init-tools.el ends here

@@ -135,7 +135,6 @@ create_link "$DOTFILES_DIR/config/emacs/init.el" "$TARGET_DIR/.config/emacs/init
 create_link "$DOTFILES_DIR/config/emacs/custom.el" "$TARGET_DIR/.config/emacs/custom.el"
 create_link "$DOTFILES_DIR/config/emacs/.mc-lists.el" "$TARGET_DIR/.config/emacs/.mc-lists.el"
 link_directory_contents "$DOTFILES_DIR/config/emacs/lisp" "$TARGET_DIR/.config/emacs/lisp"
-link_directory_contents "$DOTFILES_DIR/config/emacs/snippets" "$TARGET_DIR/.config/emacs/snippets"
 
 ## eza
 create_link "$DOTFILES_DIR/config/eza/theme.yml" "$TARGET_DIR/.config/eza/theme.yml"
