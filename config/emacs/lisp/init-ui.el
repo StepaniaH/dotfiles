@@ -2,10 +2,6 @@
 ;;; Commentary:
 ;;; Code:
 
-;; Interface elements
-(tool-bar-mode -1)
-(when (display-graphic-p) (toggle-scroll-bar -1))
-
 ;; Font settings
 (set-face-attribute 'default nil
                     :family "Hack Nerd Font Mono"

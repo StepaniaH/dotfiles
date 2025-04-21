@@ -54,7 +54,7 @@
 (setq ring-bell-function 'ignore)
 
 ;; No eyes distraction
-(setq blink-cursor-mode -1)
+(setq blink-cursor-mode nil)
 
 ;; Smooth scroll & friends
 (setq scroll-step 2
@@ -85,6 +85,45 @@
 (setq-default indent-tabs-mode nil)
 (setq-default tab-width 4)
 
+;; Sane default
+(setq use-short-answers t)
+
+;; Inhibit switching out from `y-or-n-p' and `read-char-choice'
+(setq y-or-n-p-use-read-key t
+      read-char-choice-use-read-key t)
+
+;; Enable the disabled narrow commands
+(put 'narrow-to-defun  'disabled nil)
+(put 'narrow-to-page   'disabled nil)
+(put 'narrow-to-region 'disabled nil)
+
+;; Enable the disabled dired commands (type `a' in dired to entry some directory with closing the old one)
+(put 'dired-find-alternate-file 'disabled nil)
+
+;; Enable the disabled `list-timers', `list-threads' commands
+(put 'list-timers 'disabled nil)
+(put 'list-threads 'disabled nil)
+
+;; Quick editing in `describe-variable' ;; TODO: This configuration is not working.
+(with-eval-after-load 'help-fns
+  (put 'help-fns-edit-variable 'disabled nil))
+
+;; Keep clean
+(when (and (fboundp 'menu-bar-mode) (not (eq system-type 'darwin)))
+  (menu-bar-mode -1))
+(when (fboundp 'tool-bar-mode)
+  (tool-bar-mode -1))
+(when (display-graphic-p)
+  (if (fboundp 'scroll-bar-mode)
+      (scroll-bar-mode -1)
+    (when (fboundp 'toggle-scroll-bar)
+      (toggle-scroll-bar -1))
+    (when (fboundp 'set-scroll-bar-mode)
+      (set-scroll-bar-mode nil))))
+
+
+;; TODO: this line.
+
 ;; Basic options
 (setq confirm-kill-emacs #'yes-or-no-p)
 (global-auto-revert-mode t)
@@ -94,13 +133,6 @@
 (add-hook 'prog-mode-hook #'show-paren-mode)
 (add-hook 'prog-mode-hook #'hs-minor-mode)
 (setq display-line-numbers-type 'relative)
-
-;; Sane default
-(setq use-short-answers t)
-
-;; Inhibit switching out from `y-or-n-p' and `read-char-choice'
-(setq y-or-n-p-use-read-key t
-      read-char-choice-use-read-key t)
 
 ;; Global mode
 (column-number-mode t)
