@@ -102,8 +102,6 @@
   (interactive)
   (find-file user-init-file))
 
-(global-hl-line-mode 1) ;; Highlight the current line
-
 ;;让鼠标滚动更好用
 (setq mouse-wheel-scroll-amount '(1 ((shift) . 1) ((control) . nil)))
 (setq mouse-wheel-progressive-speed nil)

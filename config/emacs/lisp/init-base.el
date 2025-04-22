@@ -121,6 +121,91 @@
     (when (fboundp 'set-scroll-bar-mode)
       (set-scroll-bar-mode nil))))
 
+;; Highlight parenthesises
+(use-package paren
+  :ensure nil
+  :hook (after-init . show-paren-mode)
+  :custom
+  (show-paren-when-point-inside-paren t)
+  (show-paren-when-point-in-periphery t))
+
+;; Show line/column number and more
+(use-package simple
+  :ensure nil
+  :custom
+  ;; show line/column/filesize in modeline
+  (line-number-mode t)
+  (column-number-mode t)
+  (size-indication-mode t)
+  ;; No visual feedback on copy/delete.
+  (copy-region-blink-delay 0)
+  (delete-pair-blink-delay 0)
+  ;; confusing if no fringes (GUI only).
+  (visual-line-fringe-indicators '(nil right-curly-arrow))
+  ;; don't save current clipboard text before replacing it
+  (save-interprogram-paste-before-kill nil)
+  ;; kill last word if there is no active region. C-w behaves more like vim.
+  (kill-region-dwim 'unix-word)
+  ;; eliminate duplicates
+  (kill-do-not-save-duplicates t)
+  ;; include '\n' when point starts at the beginning-of-line
+  (kill-whole-line t)
+  ;; show cwd when `shell-command' and `async-shell-command'
+  (shell-command-prompt-show-cwd t)
+  ;; show the name of character in `what-cursor-position'
+  (what-cursor-show-names t)
+  ;; List only applicable commands.
+  ;;
+  ;; ``` elisp
+  ;; (defun foo ()
+  ;;   (interactive nil org-mode)
+  ;;   (message "foo"))
+  ;; ```
+  ;;
+  ;; M-x foo should only be available in `org-mode` or modes derived from `org-mode`.
+  (read-extended-command-predicate #'command-completion-default-include-p))
+
+;; Type text
+(use-package text-mode
+  :ensure nil
+  :custom
+  ;; better word wrapping for CJK characters
+  (word-wrap-by-category t)
+  ;; paragraphs
+  (sentence-end-double-space nil))
+
+;; Back to the previous position
+(use-package saveplace
+  :ensure nil
+  :hook (after-init . save-place-mode))
+
+;; Highlight current line in GUI
+(use-package hl-line
+  :ensure nil
+  :when (display-graphic-p)
+  :hook (after-init . global-hl-line-mode))
+
+;; Enable `repeat-mode' to reduce key sequence length
+;;
+;; If we have been idle for `repeat-exit-timeout' seconds, exit the repeated
+;; state.
+(use-package repeat
+  :ensure nil
+  :custom
+  (repeat-mode t)
+  (repeat-exit-timeout 1)
+  (repeat-exit-key (kbd "RET")))
+
+;; Server mode.
+;; Use emacsclient to connect
+(use-package server
+  :ensure nil
+  :hook (after-init . server-mode))
+
+;; Workaround with minified source files
+(use-package so-long
+  :ensure nil
+  :hook (after-init . global-so-long-mode))
 
 ;; TODO: this line.
 
@@ -137,7 +222,14 @@
 ;; Global mode
 (column-number-mode t)
 (delete-selection-mode t)
-(global-display-line-numbers-mode 1)
+;; (global-display-line-numbers-mode 1)
+
+(use-package display-line-numbers
+  :ensure nil
+  :custom
+  (display-line-numbers-type 'relative)  ; 使用相对行号
+  :config
+  (global-display-line-numbers-mode 1))  ; 全局启用行号显示
 
 ;; Bracket pairing
 (electric-pair-mode t)
