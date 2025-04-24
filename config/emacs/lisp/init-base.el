@@ -207,6 +207,116 @@
   :ensure nil
   :hook (after-init . global-so-long-mode))
 
+;; TODO: Completion engine
+
+;; Holidays
+(use-package calendar
+  :ensure nil
+  :hook (calendar-today-visible . calendar-mark-today)
+  :custom
+  (calendar-chinese-all-holidays-flag t)
+  (holiday-local-holidays `((holiday-fixed 3 8  "Women's Day")
+                            (holiday-fixed 3 12 "Arbor Day")
+                            ,@(cl-loop for i from 1 to 3
+                                       collect `(holiday-fixed 5 ,i "International Workers' Day"))
+                            (holiday-fixed 5 4  "Chinese Youth Day")
+                            (holiday-fixed 6 1  "Children's Day")
+                            (holiday-fixed 9 10 "Teachers' Day")
+                            ,@(cl-loop for i from 1 to 7
+                                       collect `(holiday-fixed 10 ,i "National Day"))
+                            (holiday-fixed 10 24 "Programmers' Day")
+                            (holiday-fixed 11 11 "Singles' Day")))
+  (holiday-other-holidays '((holiday-fixed 4 22 "Earth Day")
+                            (holiday-fixed 4 23 "World Book Day")
+                            (holiday-sexp '(if (or (zerop (% year 400))
+                                                   (and (% year 100) (zerop (% year 4))))
+                                               (list 9 12 year)
+                                             (list 9 13 year))
+                                          "World Programmers' Day")
+                            (holiday-fixed 10 10 "World Mental Health Day")))
+  (calendar-holidays `(,@holiday-general-holidays
+                       ,@holiday-oriental-holidays
+                       ,@holiday-christian-holidays
+                       ,@holiday-other-holidays
+                       ,@holiday-local-holidays))
+  (calendar-mark-holidays-flag t)
+  (calendar-mark-diary-entries-flag nil)
+  ;; Prefer +0800 over CST
+  (calendar-time-zone-style 'numeric)
+  ;; year/month/day
+  (calendar-date-style 'iso))
+
+;; Appointment
+(use-package appt
+  :ensure nil
+  :hook (after-init . appt-activate)
+  :config
+  (defun appt-display-with-notification (min-to-app new-time appt-msg)
+    (notify-send :title (format "Appointment in %s minutes" min-to-app)
+                 :body appt-msg
+                 :urgency 'critical)
+    (appt-disp-window min-to-app new-time appt-msg))
+  :custom
+  (appt-audible nil)
+  (appt-display-diary nil)
+  (appt-display-interval 5)
+  (appt-display-mode-line t)
+  (appt-message-warning-time 15)
+  (appt-disp-window-function #'appt-display-with-notification))
+
+;; Build regexp with visual feedback
+(use-package re-builder
+  :ensure nil
+  :commands re-builder
+  :bind (:map reb-mode-map
+         ("C-c C-k" . reb-quit)
+         ("C-c C-p" . reb-prev-match)
+         ("C-c C-n" . reb-next-match))
+  :custom
+  (reb-re-syntax 'string))
+
+;; window layout manager
+;;
+;; gt next-tab
+;; gT prev-tab
+(use-package tab-bar
+  :ensure nil
+  :hook (after-init . tab-bar-mode)
+  :custom
+  (tab-bar-show t)
+  (tab-bar-tab-hints t)
+  (tab-bar-define-keys nil)
+  (tab-bar-close-button-show nil)
+  (tab-bar-tab-name-function 'tab-bar-tab-name-all)
+  (tab-bar-format '(tab-bar-format-tabs tab-bar-separator)))
+
+(use-package newcomment
+  :ensure nil
+  :bind ([remap comment-dwim] . comment-or-uncomment)
+  :config
+  (defun comment-or-uncomment ()
+    "Comment or uncomment the current line or region.
+
+If the region is active and `transient-mark-mode' is on, call
+`comment-or-uncomment-region'.
+Else, if the current line is empty, insert a comment and indent
+it.
+Else, call `comment-or-uncomment-region' on the current line."
+    (interactive)
+    (if (region-active-p)
+        (comment-or-uncomment-region (region-beginning) (region-end))
+      (if (save-excursion
+            (beginning-of-line)
+            (looking-at "\\s-*$"))
+          (comment-dwim nil)
+        (comment-or-uncomment-region (line-beginning-position) (line-end-position)))))
+  :custom
+  ;; `auto-fill' inside comments.
+  ;;
+  ;; The quoted text in `message-mode' are identified as comments, so only
+  ;; quoted text can be `auto-fill'ed.
+  (comment-auto-fill-only-comments t))
+
 ;; TODO: this line.
 
 ;; Basic options
