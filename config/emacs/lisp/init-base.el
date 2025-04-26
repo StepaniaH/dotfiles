@@ -10,7 +10,8 @@
       inhibit-default-init t
       inhibit-startup-screen t
       inhibit-startup-message t
-      inhibit-startup-echo-area-message t)
+      inhibit-startup-echo-area-message t
+      confirm-kill-emacs #'yes-or-no-p)
 
 ;; Pixelwise resize
 (setq window-resize-pixelwise t
@@ -38,6 +39,9 @@
 
 ;; Always load the newest file (default is nil)
 (setq load-prefer-newer t)
+
+;; Toggle Global Auto-Revert Mode
+(global-auto-revert-mode t)
 
 ;; Cutting and pasting use primary/clipboard
 (setq select-enable-primary t
@@ -128,6 +132,9 @@
   :custom
   (show-paren-when-point-inside-paren t)
   (show-paren-when-point-in-periphery t))
+
+;; Toggle automatic parens pairing (Electric Pair mode)
+(electric-pair-mode t)
 
 ;; Show line/column number and more
 (use-package simple
@@ -317,32 +324,186 @@ Else, call `comment-or-uncomment-region' on the current line."
   ;; quoted text can be `auto-fill'ed.
   (comment-auto-fill-only-comments t))
 
-;; TODO: this line.
+;; Command line interpreter
+(use-package comint
+  :ensure nil
+  :bind (:map comint-mode-map
+         ([remap kill-region]   . backward-kill-word))
+  :custom
+  ;; No paging, `eshell' and `shell' will honoring.
+  (comint-pager "cat")
+  ;; Make the prompt of "*Python*" buffer readonly
+  (comint-prompt-read-only t)
+  (comint-history-isearch 'dwim)
+  ;; Colorize
+  (comint-terminfo-terminal "dumb-emacs-ansi"))
 
-;; Basic options
-(setq confirm-kill-emacs #'yes-or-no-p)
-(global-auto-revert-mode t)
-(savehist-mode 1)
+;; Better abbrev expansion
+(use-package hippie-exp
+  :ensure nil
+  :bind ([remap dabbrev-expand] . hippie-expand)
+  :config
+  (defun try-expand-tempo (_old)
+    (require 'tempo)
+    (tempo-expand-if-complete))
+  :custom
+  (hippie-expand-try-functions-list '(try-expand-tempo
+                                      try-expand-dabbrev
+                                      try-expand-dabbrev-all-buffers
+                                      try-expand-dabbrev-from-kill
+                                      try-complete-file-name-partially
+                                      try-complete-file-name
+                                      try-expand-all-abbrevs
+                                      try-expand-list
+                                      try-expand-line
+                                      try-complete-lisp-symbol-partially
+                                      try-complete-lisp-symbol)))
 
-;; Programming mode settings
-(add-hook 'prog-mode-hook #'show-paren-mode)
-(add-hook 'prog-mode-hook #'hs-minor-mode)
-(setq display-line-numbers-type 'relative)
+;; Buffer index
+(use-package imenu
+  :hook (imenu-after-jump . recenter)
+  :custom
+  (imenu-flatten 'group))
 
-;; Global mode
-(column-number-mode t)
-(delete-selection-mode t)
-;; (global-display-line-numbers-mode 1)
+;; Needed by `webpaste'
+(use-package browse-url
+  :ensure nil
+  :custom
+  (browse-url-generic-program (or (executable-find "firefox")
+                                  (executable-find "chromium")
+                                  (executable-find "google-chrome-stable")
+                                  (executable-find "google-chrome")
+                                  (when (eq system-type 'darwin) "open")
+                                  (when (eq system-type 'gnu/linux) "xdg-open")))
+  (browse-url-handlers '(("\\`file:" . browse-url-default-browser))))
+
+;; Buffer manager
+;;
+;; `sR': switch to saved filter groups
+(use-package ibuffer
+  :ensure nil
+  :hook (ibuffer-mode . ibuffer-auto-mode)
+  :bind ([remap list-buffers] . ibuffer)
+  :custom
+  (ibuffer-expert t)
+  (ibuffer-movement-cycle nil)
+  (ibuffer-show-empty-filter-groups nil)
+  (ibuffer-saved-filter-groups
+   '(("Default"
+      ("Emacs" (or (name . "\\*scratch\\*")
+                   (name . "\\*dashboard\\*")
+                   (name . "\\*compilation\\*")
+                   (name . "\\*Backtrace\\*")
+                   (name . "\\*Packages\\*")
+                   (name . "\\*Messages\\*")
+                   (name . "\\*Customize\\*")))
+      ("Browser" (or (mode . eww-mode)
+                     (mode . xwidget-webkit-mode)))
+      ("Help" (or (name . "\\*Help\\*")
+                  (name . "\\*Apropos\\*")
+                  (name . "\\*info\\*")
+                  (mode . Man-mode)
+                  (mode . woman-mode)))
+      ("Repl" (or (mode . gnuplot-comint-mode)
+                  (mode . inferior-emacs-lisp-mode)
+                  (mode . inferior-python-mode)))
+      ("Term" (or (mode . term-mode)
+                  (mode . shell-mode)
+                  (mode . eshell-mode)))
+      ("Mail" (or (mode . mail-mode)
+                  (mode . message-mode)
+                  (derived-mode . gnus-mode)))
+      ("Conf" (or (mode . yaml-mode)
+                  (mode . conf-mode)))
+      ("Dict" (or (mode . fanyi-mode)
+                  (mode . dictionary-mode)))
+      ("Text" (and (derived-mode . text-mode)
+                   (not (starred-name))))
+      ("Magit" (or (mode . magit-repolist-mode)
+                   (mode . magit-submodule-list-mode)
+                   (mode . git-rebase-mode)
+                   (derived-mode . magit-section-mode)
+                   (mode . vc-annotate-mode)))
+      ("VC" (or (mode . diff-mode)
+                (derived-mode . log-view-mode)))
+      ("Prog" (and (derived-mode . prog-mode)
+                   (not (starred-name))))
+      ("Dired" (mode . dired-mode))
+      ("IRC" (or (mode . rcirc-mode)
+                 (mode . erc-mode)))))))
+
+;; Notifications
+;;
+;; Actually, `notify-send' is not defined in notifications package, but the
+;; autoload cookie will make Emacs load `notifications' first, then our
+;; `defalias' will be evaluated.
+(pcase system-type
+  ('gnu/linux
+   (use-package notifications
+     :ensure nil
+     :commands notify-send
+     :config
+     (defalias 'notify-send 'notifications-notify)))
+  ('darwin
+   (defun notify-send (&rest params)
+     "Send notifications via `terminal-notifier'."
+     (let ((title (plist-get params :title))
+           (body (plist-get params :body)))
+       (start-process "terminal-notifier"
+                      nil
+                      "terminal-notifier"
+                      "-group" "Emacs"
+                      "-title" title
+                      "-message" body
+                      "-activate" "org.gnu.Emacs"))))
+  (_
+   (defalias 'notify-send 'ignore)))
+
+;; Recently opened files
+(use-package recentf
+  :ensure nil
+  :hook (after-init . recentf-mode)
+  :custom
+  (recentf-max-saved-items 300)
+  (recentf-auto-cleanup 'never)
+  (recentf-exclude '(;; Folders on MacOS start
+                     "^/private/tmp/"
+                     "^/var/folders/"
+                     ;; Folders on MacOS end
+                     "^/tmp/"
+                     "/ssh\\(x\\)?:"
+                     "/su\\(do\\)?:"
+                     "^/usr/include/"
+                     "/TAGS\\'"
+                     "COMMIT_EDITMSG\\'")))
+
+(use-package savehist
+  :ensure nil
+  :hook (after-init . savehist-mode)
+  :custom
+  (savehist-additional-variables '(mark-ring
+                                   global-mark-ring
+                                   (kill-ring . 50))))
+
+;; Try out emacs package without installing
+(use-package try
+  :ensure t
+  :commands try try-and-refresh)
+
+;; MacOS specific
+(use-package exec-path-from-shell
+  :ensure t
+  :when (eq system-type 'darwin)
+  :hook (after-init . exec-path-from-shell-initialize))
 
 (use-package display-line-numbers
   :ensure nil
   :custom
   (display-line-numbers-type 'relative)  ; 使用相对行号
   :config
-  (global-display-line-numbers-mode 1))  ; 全局启用行号显示
-
-;; Bracket pairing
-(electric-pair-mode t)
+  (global-display-line-numbers-mode 1)
+  (column-number-mode t)
+  (delete-selection-mode t))
 
 
 (provide 'init-base)
