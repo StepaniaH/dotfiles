@@ -2,6 +2,170 @@
 ;;; Commentary:
 ;;; Code:
 
+(require 'init-macros)
+
+;; Compilation Mode
+(use-package compile
+  :ensure nil
+  :hook (compilation-filter . ansi-color-compilation-filter)
+  :custom
+  (compilation-always-kill t)
+  (compilation-scroll-output t)
+  ;; Save all buffers on M-x `compile'
+  (compilation-ask-about-save nil))
+
+;; The unified debugger
+(use-package gud
+  :ensure nil
+  :hook (gud-mode . gud-tooltip-mode)
+  :custom
+  (gud-highlight-current-line t))
+
+;; GDB specific config
+(use-package gdb-mi
+  :ensure nil
+  :commands gdb
+  :custom
+  (gdb-show-main t)
+  (gdb-display-io-nopopup t)
+  (gdb-show-changed-values t)
+  (gdb-delete-out-of-scope t)
+  (gdb-use-colon-colon-notation t)
+  (gdb-debuginfod-enable-setting nil)
+  (gdb-restore-window-configuration-after-quit t))
+
+;; #number can be clickable.
+(use-package bug-reference
+  :ensure nil
+  :bind (:map bug-reference-map
+              ("C-c C-o" . bug-reference-push-button)))
+
+;; Insert SPDX license header
+(use-package spdx
+  :ensure t
+  :hook (prog-mode . spdx-tempo-setup)
+  :custom
+  (spdx-ignore-deprecated t))
+
+;; Highlight TODO
+(use-package hl-todo
+  :ensure t
+  :hook (after-init . global-hl-todo-mode)
+  :bind (:map hl-todo-mode-map
+         ("C-c t p" . hl-todo-previous)
+         ("C-c t n" . hl-todo-next)
+         ("C-c t i" . hl-todo-insert)
+         ("C-c t o" . hl-todo-occur)
+         ("C-c t s" . hl-todo-rgrep)))
+
+;; Show trailing whitespaces
+(use-package whitespace
+  :ensure nil
+  :hook ((prog-mode markdown-mode conf-mode) . whitespace-mode)
+  :custom
+  (whitespace-style '(face trailing)))
+
+;; Quickrun codes, including cpp. awesome!
+(use-package quickrun
+  :ensure t
+  :bind ("C-c x" . quickrun)
+  :custom
+  (quickrun-focus-p nil)
+  (quickrun-input-file-extension ".qr"))
+
+;; Project management
+(use-package projectile
+  :ensure t
+  :hook (after-init . projectile-mode)
+  :bind (:map projectile-mode-map
+         ("C-c p" . projectile-command-map))
+  :config
+  (dolist (dir '("bazel-bin"
+                 "bazel-out"
+                 "bazel-testlogs"))
+    (add-to-list 'projectile-globally-ignored-directories dir))
+  :custom
+  (projectile-use-git-grep t)
+  (projectile-indexing-method 'alien)
+  (projectile-kill-buffers-filter 'kill-only-files)
+  ;; Ignore uninteresting files. It has no effect when using alien mode.
+  (projectile-globally-ignored-files '("TAGS" "tags" ".DS_Store"))
+  (projectile-globally-ignored-file-suffixes '(".elc" ".pyc" ".o" ".swp" ".so" ".a"))
+  (projectile-ignored-projects `("~/"
+                                 "/tmp/"
+                                 "/private/tmp/"
+                                 ,package-user-dir)))
+
+;; Lint tool
+(use-package flycheck
+  :ensure t
+  :hook (prog-mode . flycheck-mode)
+  :custom
+  (flycheck-temp-prefix ".flycheck")
+  (flycheck-check-syntax-automatically '(save mode-enabled))
+  (flycheck-emacs-lisp-load-path 'inherit)
+  (flycheck-indication-mode 'right-fringe))
+
+;; xref
+(use-package xref
+  :ensure nil
+  :hook ((xref-after-return xref-after-jump) . recenter)
+  :custom
+  ;; Emacs 28+
+  ;;
+  ;; `project-find-regexp' can be faster when setting `xref-search-program' to
+  ;;  `ripgrep'.
+  (xref-search-program (cond ((executable-find "rg") 'ripgrep)
+                             ((executable-find "ugrep") 'ugrep)
+                             (t 'grep)))
+  (xref-history-storage 'xref-window-local-history)
+  (xref-show-xrefs-function #'xref-show-definitions-completing-read)
+  (xref-show-definitions-function #'xref-show-definitions-completing-read))
+
+;; Jump to definition, used as a fallback of lsp-find-definition
+(use-package dumb-jump
+  :ensure t
+  :bind (("M-g j" . dumb-jump-go)
+         ("M-g J" . dumb-jump-go-other-window))
+  :custom
+  (dumb-jump-quiet t)
+  (dumb-jump-aggressive t)
+  (dumb-jump-selector 'completing-read))
+
+;; Jump to definition, used as a fallback of lsp-find-definition
+(use-package dumb-jump
+  :ensure t
+  :bind (("M-g j" . dumb-jump-go)
+         ("M-g J" . dumb-jump-go-other-window))
+  :custom
+  (dumb-jump-quiet t)
+  (dumb-jump-aggressive t)
+  (dumb-jump-selector 'completing-read))
+
+;; A fancy ctags frontend
+;; I use `universal-ctags' on macOS.
+(use-package citre
+  :ensure t
+  :init
+  ;; Load the prelude.
+  (require 'citre-config)
+  :bind (("C-c c j" . citre-jump)
+         ("C-c c J" . citre-query-jump)
+         ("C-c c /" . citre-jump-to-reference)
+         ("C-c c ?" . citre-query-jump-to-reference)
+         ("C-c c u" . citre-update-this-tags-file)
+         ("C-c c g" . citre-global-update-database))
+  :custom
+  (citre-enable-capf-integration nil)
+  (citre-auto-enable-citre-mode-modes '(prog-mode)))
+
+;; Browse devdocs.io
+(use-package devdocs
+  :ensure t
+  :bind ("C-c b" . devdocs-lookup)
+  :config
+  (add-to-list 'completion-category-overrides '(devdocs (styles . (flex)))))
+
 ;; Hiding structured data
 ;;
 ;; zm hide-all
@@ -53,55 +217,57 @@
   (hs-hide-comments-when-hiding-all nil)
   (hs-set-up-overlay #'hideshow-folded-overlay-fn))
 
+;; TODO: antlr-mode (https://github.com/condy0919/.emacs.d/blob/16b0b7f4c1480b696f7fab4bc755c2b73c7ad194/lisp/init-dev.el)
 
-;; TODO: Non-copy from this line
+;; XML
+(use-package nxml-mode
+  :ensure nil
+  :mode (("\\.xml\\'" . nxml-mode)
+         ("\\.rss\\'" . nxml-mode))
+  :custom
+  (nxml-slash-auto-complete-flag t)
+  (nxml-auto-insert-xml-declaration-flag t))
+
+;; Config files mode
+(use-package yaml-mode
+  :ensure t
+  :mode ("\\.ya?ml\\'" . yaml-mode))
+
+;; TODO: graphviz-dot-mode (https://github.com/condy0919/.emacs.d/blob/16b0b7f4c1480b696f7fab4bc755c2b73c7ad194/lisp/init-dev.el)
+
+;; Syntax highlighting for systemd files
+(use-package conf-mode
+  :ensure nil
+  :mode ((rx "."
+             (or "automount" "busname" "link" "mount" "netdev" "network"
+                 "path" "service" "slice" "socket" "swap" "target" "timer")
+             string-end) . conf-toml-mode))
+
+(use-package treesit
+  :ensure nil
+  :config
+  (setq treesit-language-source-alist
+        '((c . ("https://github.com/tree-sitter/tree-sitter-c"))
+          (cpp . ("https://github.com/tree-sitter/tree-sitter-cpp"))
+          (json . ("https://github.com/tree-sitter/tree-sitter-json")))))
+
+;; tiny - quickly generate sequences and structured text
+;; Usage: m1:10 (sequence 1-10), m1:10:2 (step 2), m97,122x (letters a-z)
+;; m<scope>:<format option>
+;; Type pattern and press C-; to expand, see https://github.com/abo-abo/tiny
 (use-package tiny
  :ensure t
- ;; 可选绑定快捷键，笔者个人感觉不绑定快捷键也无妨
  :bind
  ("C-;" . tiny-expand))
 
-(use-package flycheck
- :ensure t
- :config
- (setq truncate-lines nil) ; 如果单行信息很长会自动换行
- :hook
- (prog-mode . flycheck-mode))
-
-(use-package projectile
- :ensure t
- :bind (("C-c p" . projectile-command-map))
- :config
- (setq projectile-mode-line "Projectile")
- (setq projectile-track-known-projects-automatically nil))
-
-(use-package counsel-projectile
- :ensure t
- :after (projectile)
- :init (counsel-projectile-mode))
-
-(use-package magit
-  :ensure t)
-
-(use-package treemacs
- :ensure t
- :defer t
- :config
- (treemacs-tag-follow-mode)
- :bind
- (:map global-map
-    ("M-0"    . treemacs-select-window)
-    ("C-x t 1"  . treemacs-delete-other-windows)
-    ("C-x t t"  . treemacs)
-    ("C-x t B"  . treemacs-bookmark)
-    ;; ("C-x t C-t" . treemacs-find-file)
-    ("C-x t M-t" . treemacs-find-tag))
- (:map treemacs-mode-map
-	("/" . treemacs-advanced-helpful-hydra)))
-
-(use-package treemacs-projectile
- :ensure t
- :after (treemacs projectile))
+;; (require 'init-cpp)
+;; (require 'init-rust)
+;; (require 'init-ocaml)
+;; (require 'init-bazel)
+;; (require 'init-haskell)
+;; (require 'init-python)
+;; (require 'init-elisp)
+;; (require 'init-sh)
 
 (provide 'init-dev)
 ;;; init-dev.el ends here

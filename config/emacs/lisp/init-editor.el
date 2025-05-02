@@ -67,13 +67,6 @@ Up^^       Down^^      Miscellaneous      % 2(mc/num-cursors) cursor%s(if (> (mc
  ("C-a" . mwim-beginning-of-code-or-line)
  ("C-e" . mwim-end-of-code-or-line))
 
-;; Quick jump
-(use-package avy
- :ensure t
- :bind
- (("C-j C-SPC" . avy-goto-char-timer)
-  ("C-j C-l" . avy-goto-line)))
-
 ;; Highlight symbol
 (use-package highlight-symbol
  :ensure t

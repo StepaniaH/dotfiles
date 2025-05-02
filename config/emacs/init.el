@@ -6,16 +6,11 @@
 
 ;;; Code:
 
-;; Garbage collection configuration for the startup times speed.
-;; Set extremely lenient garbage collection conditions at startup
+;; A big contributor to startup times is garbage collection. We up the gc
+;; threshold to temporarily prevent it from running, and then reset it by the
+;; `gcmh' package.
 (setq gc-cons-threshold most-positive-fixnum
-      gc-cons-percentage 0.6)  ;; Increase to 60%, reduce the number of GCs during the startup process
-
-;; Restore to a reasonable but still lenient value after startup.
-(add-hook 'emacs-startup-hook
-          (lambda ()
-            (setq gc-cons-threshold (* 256 1024 1024)  ;; 256MB
-		  gc-cons-percentage 0.1)))            ;; Default value
+      gc-cons-percentage 0.6)
 
 ;; Increase how much is read from processes in a single chunk (default is 4kb).
 ;; `lsp-mode' benefits from that.
@@ -81,16 +76,22 @@
 
 
 ;; Core modules
-(require 'init-base)    ;; Basic options
-(require 'init-ui)      ;; UI
+(require 'init-base)
+(require 'init-utils)
+(require 'init-ui)
+(require 'init-tools)
+(require 'init-lsp)
+(require 'init-git)
+(require 'init-dev)
+(require 'init-dired)
+(require 'init-minibuffer)
 (require 'init-keybindings)    ;; Global key-bindings
 
 ;; Functionality modules
-(require 'init-tools)     ;; Basic tools
 (require 'init-editor)  ;; Editor behavior
 (require 'init-completion)   ;; Complete framework
-(require 'init-dev)
-(require 'init-lsp)
+
+
 (require 'init-org)
 
 ;; standalone apps
