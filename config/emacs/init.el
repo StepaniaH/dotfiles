@@ -81,11 +81,8 @@
 (require 'init-org)
 ;; (require 'init-text)
 ;; (require 'init-mail)
-;; (require 'init-shell)
+(require 'init-shell)
 (require 'init-spell)
-
-;; Functionality modules
-(require 'init-editor)  ;; Editor behavior
 
 ;; Load custom settings at the end to avoid some unexpected error.
 (when (file-exists-p custom-file)

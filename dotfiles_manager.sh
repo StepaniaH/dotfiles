@@ -134,11 +134,11 @@ create_link "$DOTFILES_DIR/config/btop/btop.conf" "$TARGET_DIR/.config/btop/btop
 link_directory_contents "$DOTFILES_DIR/config/btop/themes" "$TARGET_DIR/.config/btop/themes"
 
 ## emacs
+create_link "$DOTFILES_DIR/config/emacs/early-init.el" "$TARGET_DIR/.config/emacs/early-init.el"
 create_link "$DOTFILES_DIR/config/emacs/init.el" "$TARGET_DIR/.config/emacs/init.el"
-create_link "$DOTFILES_DIR/config/emacs/custom.el" "$TARGET_DIR/.config/emacs/custom.el"
 create_link "$DOTFILES_DIR/config/emacs/.mc-lists.el" "$TARGET_DIR/.config/emacs/.mc-lists.el"
 link_directory_contents "$DOTFILES_DIR/config/emacs/lisp" "$TARGET_DIR/.config/emacs/lisp"
-link_directory_contents "$DOTFILES_DIR/config/emacs/lisp/lang" "$TARGET_DIR/.config/emacs/lisp/lang"
+link_directory_contents "$DOTFILES_DIR/config/emacs/lisp/lang" "$TARGET_DIR/.config/emacs/qlisp/lang"
 
 ## eza
 create_link "$DOTFILES_DIR/config/eza/theme.yml" "$TARGET_DIR/.config/eza/theme.yml"

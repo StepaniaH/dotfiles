@@ -65,6 +65,7 @@
   :config
   (with-no-warnings
     (lsp-enable-which-key-integration t))
+  (setq lsp-disabled-clients '(pylsp pyls mspyls))
   :custom
   (lsp-keymap-prefix "C-c l")
   (lsp-enable-links nil)                    ;; no clickable links
@@ -132,6 +133,12 @@
                                        :foldingRangeProvider
                                        :colorProvider
                                        :inlayHintProvider)))
+
+;; 添加lsp-pyright支持
+(use-package lsp-pyright
+  :ensure t
+  :after lsp-mode
+  :hook (python-mode . lsp-deferred))
 
 (provide 'init-lsp)
 ;;; init-lsp.el ends here

@@ -71,7 +71,8 @@
   :bind ("C-c x" . quickrun)
   :custom
   (quickrun-focus-p nil)
-  (quickrun-input-file-extension ".qr"))
+  (quickrun-input-file-extension ".qr")
+  (quickrun-debug t))
 
 ;; Project management
 (use-package projectile
@@ -260,9 +261,9 @@
  :bind
  ("C-;" . tiny-expand))
 
-;; (require 'init-python)
-;; (require 'init-elisp)
-;; (require 'init-sh)
+(require 'init-python)
+(require 'init-elisp)
+(require 'init-sh)
 
 (provide 'init-dev)
 ;;; init-dev.el ends here
