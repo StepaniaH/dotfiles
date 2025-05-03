@@ -539,5 +539,11 @@ Else, call `comment-or-uncomment-region' on the current line."
   :when (eq system-type 'darwin)
   :hook (after-init . exec-path-from-shell-initialize))
 
+(use-package emacs
+  :ensure nil
+  :config
+  (when (eq system-type 'darwin)
+    (setq delete-by-moving-to-trash t)))
+
 (provide 'init-base)
 ;;; init-base.el ends here

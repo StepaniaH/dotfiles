@@ -82,7 +82,7 @@ link_directory_contents() {
     local src_dir="$1"
     local dest_dir="$2"
     
-    # Check the source file is existing or not
+    # Check the source file is execting or not
     if [[ ! -d "$src_dir" ]]; then
         echo -e "${RED}Error: The source file is missing: $src_dir${NC}"
         return 1
@@ -96,9 +96,10 @@ link_directory_contents() {
     
     echo -e "${BLUE}Link the contents of $src_dir to $dest_dir${NC}"
     
-    # Traverse all files and folders in the source directory
+    # Traverse all files in the source directory, ignoring subdirectories
     for item in "$src_dir"/*; do
-        if [[ -e "$item" ]]; then
+        # Only process regular files, ignore directories
+        if [[ -f "$item" ]]; then
             local item_name=$(basename "$item")
             local dest_path="$dest_dir/$item_name"
             
@@ -112,9 +113,11 @@ link_directory_contents() {
                 rm -f "$dest_path"
             fi
             
-            # Create symbal links
+            # Create symbolic links
             ln -s "$item" "$dest_path"
             echo -e "${GREEN}Connecting finished: $item -> $dest_path${NC}"
+        elif [[ -d "$item" ]]; then
+            echo -e "${BLUE}Skipping directory: $(basename "$item")${NC}"
         fi
     done
 }
@@ -135,6 +138,7 @@ create_link "$DOTFILES_DIR/config/emacs/init.el" "$TARGET_DIR/.config/emacs/init
 create_link "$DOTFILES_DIR/config/emacs/custom.el" "$TARGET_DIR/.config/emacs/custom.el"
 create_link "$DOTFILES_DIR/config/emacs/.mc-lists.el" "$TARGET_DIR/.config/emacs/.mc-lists.el"
 link_directory_contents "$DOTFILES_DIR/config/emacs/lisp" "$TARGET_DIR/.config/emacs/lisp"
+link_directory_contents "$DOTFILES_DIR/config/emacs/lisp/lang" "$TARGET_DIR/.config/emacs/lisp/lang"
 
 ## eza
 create_link "$DOTFILES_DIR/config/eza/theme.yml" "$TARGET_DIR/.config/eza/theme.yml"

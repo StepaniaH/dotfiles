@@ -59,7 +59,9 @@
 
 (use-package marginalia
   :ensure t
-  :hook (after-init . marginalia-mode))
+  :hook (after-init . marginalia-mode)
+  :bind (:map minibuffer-local-map
+              ("M-A" . marginalia-cycle)))
 
 (provide 'init-minibuffer)
 ;;; init-minibuffer.el ends here
