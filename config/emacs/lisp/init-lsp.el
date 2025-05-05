@@ -11,52 +11,54 @@
 ;;
 ;; https://company-mode.github.io/manual/
 (use-package company
- :ensure t
- :hook (prog-mode . company-mode)
- :bind (:map company-mode-map
-             ([remap completion-at-point] . company-complete)
-             :map company-active-map
-             ("C-s"     . company-filter-candidates)
-             ([tab]     . company-complete-common-or-cycle)
-             ([backtab] . company-select-previous-or-abort))
- :config
- (define-advice company-capf--candidates (:around (func &rest args))
+  :ensure t
+  :hook (prog-mode . company-mode)
+  :bind (:map company-mode-map
+              ([remap completion-at-point] . company-complete)
+              :map company-active-map
+              ("C-s"     . company-filter-candidates)
+              ([tab]     . company-complete-common-or-cycle)
+              ([backtab] . company-select-previous-or-abort))
+  :config
+  (define-advice company-capf--candidates (:around (func &rest args))
     "Try default completion styles."
     (let ((completion-styles '(basic partial-completion)))
       (apply func args)))
- :custom
- (company-idle-delay 0)
- (company-show-quick-access t)
- (company-require-match nil)
- (company-minimum-prefix-length 3)
- (company-tooltip-width-grow-only t)
- (company-tooltip-align-annotations t)
- (company-show-numbers t)
- (company-selection-wrap-around t)
- (company-transformers '(company-sort-by-occurrence))
- ;; complete `abbrev' only in current buffer and make dabbrev case-sensitive
- (company-dabbrev-other-buffers nil)
- (company-dabbrev-ignore-case nil)
- (company-dabbrev-downcase nil)
- ;; make dabbrev-code case-sensitive
- (company-dabbrev-code-ignore-case nil)
- (company-dabbrev-code-everywhere t)
- ;; call `tempo-expand-if-complete' after completion
- (company-tempo-expand t)
- ;; Ignore uninteresting files. Items end with a slash are recognized as
- ;; directories.
- (company-files-exclusions '(".git/" ".DS_Store"))
- ;; No icons
- (company-format-margin-function nil)
- (company-backends '((company-capf :with company-tempo)
-                     company-files
-                     (company-dabbrev-code company-keywords)
-                     company-dabbrev)))
+  :custom
+  (company-idle-delay 0)
+  (company-show-quick-access t)
+  (company-require-match nil)
+  (company-minimum-prefix-length 3)
+  (company-tooltip-width-grow-only t)
+  (company-tooltip-align-annotations t)
+  (company-show-numbers t)
+  (company-selection-wrap-around t)
+  (company-transformers '(company-sort-by-occurrence))
+  ;; complete `abbrev' only in current buffer and make dabbrev case-sensitive
+  (company-dabbrev-other-buffers nil)
+  (company-dabbrev-ignore-case nil)
+  (company-dabbrev-downcase nil)
+  ;; make dabbrev-code case-sensitive
+  (company-dabbrev-code-ignore-case nil)
+  (company-dabbrev-code-everywhere t)
+  ;; call `tempo-expand-if-complete' after completion
+  (company-tempo-expand t)
+  ;; Ignore uninteresting files. Items end with a slash are recognized as
+  ;; directories.
+  (company-files-exclusions '(".git/" ".DS_Store"))
+  ;; No icons
+  (company-format-margin-function nil)
+  (company-backends '((company-capf :with company-tempo)
+                      company-files
+                      (company-dabbrev-code company-keywords)
+                      company-dabbrev)))
 
 ;; lsp-mode
 (use-package lsp-mode
   :ensure t
-  :hook (prog-mode . lsp-deferred)
+  :hook ((prog-mode . (lambda ()
+                        (unless (derived-mode-p 'emacs-lisp-mode)
+                          (lsp-deferred)))))
   :bind (:map lsp-mode-map
          ("C-c f" . lsp-format-region)
          ("C-c d" . lsp-describe-thing-at-point)

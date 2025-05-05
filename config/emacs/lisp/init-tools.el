@@ -22,11 +22,8 @@
   (which-key-ellipsis "..")
   (which-key-separator " → ")
   (which-key-dont-use-unicode nil)
-  (which-key-idle-delay 0.5)
-  (which-key-add-column-padding 1))
+  (which-key-idle-delay 0.5))
 
-;; The blazing grep tool
-;;
 ;; Press C-c s to search
 (use-package rg
   :ensure t

@@ -9,8 +9,10 @@
   :ensure t
   :hook ((after-init . vertico-mode)
          (minibuffer-setup . vertico-repeat-save))
-  :custom
-  (vertico-sort-function nil))
+  :config
+  (setq vertico-multiform-categories
+      '((symbol (vertico-sort-function . vertico-sort-alpha))
+        (file (vertico-sort-function . sort-directories-first)))))
 
 (use-package embark
   :ensure t
