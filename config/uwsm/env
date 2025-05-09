@@ -1,0 +1,13 @@
+XDG_CURRENT_DESKTOP=Hyprland
+XDG_SESSION_DESKTOP=Hyprland
+XDG_SESSION_TYPE=wayland
+
+export XCURSOR_THEME=catppuccin-mocha-mauve-cursors
+export HYPRCURSOR_THEME=catppuccin-mocha-mauve-cursors
+export XCURSOR_SIZE=28
+export HYPRCURSOR_SIZE=28
+
+export HYPRSHOT_DIR=~/Pictures/Screenshots/
+
+# Set Steam Environment
+export DXVK_ASYNC=1

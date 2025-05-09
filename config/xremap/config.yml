@@ -1,0 +1,7 @@
+modmap:
+  - name: capslock to esc and ctrl_L
+    remap:
+      CapsLock:
+        held: KEY_LEFTCTRL
+        alone: KEY_ESC
+
