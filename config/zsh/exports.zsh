@@ -36,3 +36,10 @@ export EZA_CONFIG_DIR="$HOME/.config/eza"
 
 eval $(thefuck --alias)
 eval $(thefuck --alias mario)
+
+if [[ -f "/etc/arch-release" ]]; then
+  if uwsm check may-start; then
+    uwsm start hyprland.desktop || echo "uwsm failed to start Hyprland" >> ~/uwsm_error.log
+    exec zsh
+  fi 
+fi
