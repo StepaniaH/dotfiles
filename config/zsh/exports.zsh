@@ -30,6 +30,9 @@ export HOMEBREW_NO_ENV_HINTS=1
 export STARSHIP_CONFIG=~/.config/zsh/starship.toml           # Starship Config
 eval "$(starship init zsh)"                              # Starship Init
 
+export JAVA_HOME="/opt/homebrew/opt/openjdk"
+export PATH="${JAVA_HOME}/bin:${PATH}"
+
 HISTFILE=~/.config/zsh/.zsh_hist                                     # Where to store zsh history
 
 export EZA_CONFIG_DIR="$HOME/.config/eza"
