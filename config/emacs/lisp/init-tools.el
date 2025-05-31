@@ -320,10 +320,5 @@ Up^^       Down^^      Miscellaneous      % 2(mc/num-cursors) cursor%s(if (> (mc
  ("u"  undo-tree-visualize "visualize" :color blue)
  ("q"  nil "quit" :color blue)))
 
-(use-package wakatime-mode
-  :ensure t
-  :config
-  (global-wakatime-mode))
-
 (provide 'init-tools)
 ;;; init-tools.el ends here
