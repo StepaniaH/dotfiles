@@ -64,10 +64,12 @@
          ("C-c d" . lsp-describe-thing-at-point)
          ("C-c a" . lsp-execute-code-action)
          ("C-c r" . lsp-rename))
+  :init
+  (setq lsp-disabled-clients '(pylsp pyls mspyls terraform-ls))
+  ;;(setq lsp-disabled-clients '(pylsp pyls mspyls))
   :config
   (with-no-warnings
     (lsp-enable-which-key-integration t))
-  (setq lsp-disabled-clients '(pylsp pyls mspyls))
   :custom
   (lsp-keymap-prefix "C-c l")
   (lsp-enable-links nil)                    ;; no clickable links
