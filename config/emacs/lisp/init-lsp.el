@@ -66,7 +66,6 @@
          ("C-c r" . lsp-rename))
   :init
   (setq lsp-disabled-clients '(pylsp pyls mspyls terraform-ls))
-  ;;(setq lsp-disabled-clients '(pylsp pyls mspyls))
   :config
   (with-no-warnings
     (lsp-enable-which-key-integration t))
