@@ -179,6 +179,7 @@ if [ $OS_TYPE == "macos" ]
 then
   ## karabiner
   create_link "$DOTFILES_DIR/config/karabiner/karabiner.json" "$TARGET_DIR/.config/karabiner/karabiner.json"
+  link_directory_contents "$DOTFILES_DIR/config/yabai" "$TARGET_DIR/.config/yabai"
 fi
 
 # The Arch OS's files.
